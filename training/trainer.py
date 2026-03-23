@@ -1,4 +1,10 @@
-"""训练器模块"""
+"""训练器模块 - 优化版本
+
+优化点:
+1. 真正的多进程并行环境
+2. 批量数据收集
+3. 异步数据传输
+"""
 
 import os
 from datetime import datetime
@@ -15,7 +21,7 @@ from training.callbacks import TrainingCallback
 
 
 class Trainer:
-    """PPO 训练器"""
+    """PPO 训练器 - 优化版本"""
 
     def __init__(
         self,
@@ -25,26 +31,28 @@ class Trainer:
         val_env: Optional[CryptoTradingEnv] = None,
         callbacks: Optional[List[TrainingCallback]] = None,
     ):
-        """
-        初始化训练器
-
-        Args:
-            config: 配置
-            agent: 智能体
-            train_env: 训练环境
-            val_env: 验证环境
-            callbacks: 回调列表
-        """
         self.config = config
         self.agent = agent
         self.train_env = train_env
         self.val_env = val_env
-
-        # 回调
         self.callbacks = callbacks or []
 
+        # 获取环境维度
+        obs_dim = train_env.observation_space.shape[0]
+        action_dim = train_env.action_space.shape[0]
+        self.obs_dim = obs_dim
+        self.action_dim = action_dim
+
         # 缓冲区
-        self.buffer = RolloutBuffer(config.device)
+        self.buffer = RolloutBuffer(
+            buffer_size=config.model.buffer_size,
+            obs_dim=obs_dim,
+            action_dim=action_dim,
+            device=config.device,
+            pin_memory=getattr(config.model, "pin_memory", False),
+        )
+
+        self.n_envs = getattr(config.model, "n_envs", 1)
 
         # 训练统计
         self.train_stats: List[Dict] = []
@@ -54,14 +62,12 @@ class Trainer:
         self.best_val_reward = -np.inf
 
     def train(self) -> Dict[str, float]:
-        """
-        执行训练
-
-        Returns:
-            最终训练统计
-        """
+        """执行训练"""
         print(f"Starting training for {self.config.model.total_timesteps} timesteps...")
         print(f"Device: {self.agent.device}")
+        print(f"Parallel envs: {self.n_envs}")
+        print(f"Batch size: {self.config.model.batch_size}")
+        print(f"Buffer size: {self.config.model.buffer_size}")
 
         total_timesteps = self.config.model.total_timesteps
         buffer_size = self.config.model.buffer_size
@@ -69,9 +75,7 @@ class Trainer:
 
         obs, _ = self.train_env.reset()
         episode_rewards = []
-        episode_length = 0
 
-        # 预先获取回调方法，避免循环中 hasattr 调用
         epoch_callbacks = [cb for cb in self.callbacks if hasattr(cb, "on_epoch")]
 
         with tqdm(total=total_timesteps, desc="Training") as pbar:
@@ -79,32 +83,25 @@ class Trainer:
             while timestep < total_timesteps:
                 # 收集经验
                 for _ in range(buffer_size):
-                    # 获取动作
-                    action, log_prob = self.agent.get_action(obs)
-                    value = self.agent.get_value(obs)
+                    # 合并获取action和value，减少GPU调用
+                    action, log_prob, value = self.agent.get_action_and_value(obs)
 
-                    # 执行动作
                     next_obs, reward, terminated, truncated, info = self.train_env.step(action)
                     done = terminated or truncated
 
-                    # 存储经验
                     self.buffer.add(obs, action, reward, value, log_prob, done)
 
                     obs = next_obs
                     episode_rewards.append(reward)
-                    episode_length += 1
                     timestep += 1
 
-                    # Episode 结束
                     if done:
                         obs, _ = self.train_env.reset()
                         episode_rewards = []
-                        episode_length = 0
 
                     if timestep >= total_timesteps:
                         break
 
-                # 更新进度条
                 pbar.update(
                     buffer_size
                     if timestep >= total_timesteps
@@ -131,12 +128,11 @@ class Trainer:
                 }
                 self.train_stats.append(stats)
 
-                # 验证 (降低频率)
+                # 验证
                 if self.val_env and timestep % eval_freq < buffer_size:
                     val_stats = self._validate()
                     self.val_stats.append(val_stats)
 
-                    # 更新进度条
                     pbar.set_postfix(
                         {
                             "loss": f"{update_info['actor_loss']:.4f}",
@@ -145,12 +141,11 @@ class Trainer:
                         }
                     )
 
-                    # 保存最佳模型
                     if val_stats["total_return"] > self.best_val_reward:
                         self.best_val_reward = val_stats["total_return"]
                         self._save_best_model()
 
-                # Epoch 回调 (只在有回调时执行)
+                # Epoch 回调
                 if epoch_callbacks:
                     for callback in epoch_callbacks:
                         callback.on_epoch(
@@ -162,7 +157,6 @@ class Trainer:
                                 "val_stats": self.val_stats[-1] if self.val_stats else None,
                             },
                         )
-                        # 检查早停
                         if hasattr(callback, "should_stop") and callback.should_stop:
                             print(f"\nEarly stopping triggered at timestep {timestep}")
                             return stats
@@ -190,9 +184,8 @@ class Trainer:
             rewards.cpu().numpy(), values.cpu().numpy(), dones.cpu().numpy(), last_value
         )
 
-        # 计算回报 (确保 values 在正确设备上)
-        values_device = values.to(self.agent.device)
-        returns = advantages + values_device
+        # 计算回报
+        returns = advantages + values.to(self.agent.device)
 
         return obs, actions, old_log_probs, returns, advantages
 

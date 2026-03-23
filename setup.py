@@ -30,7 +30,7 @@ setup(
             "plotly>=5.14.0",
         ],
     },
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     entry_points={
         "console_scripts": [
             "crypto-train=crypto_trading_agent.scripts.train:main",

@@ -54,7 +54,7 @@ def main():
     datasets = {"train": train_data, "val": val_data, "test": test_data}
 
     # 加载模型
-    agent = PPOAgent(config.model, config.device)
+    agent = PPOAgent(config.model, config.model.network, config.device)
 
     results = {}
     backtester = Backtester(config)
@@ -74,7 +74,11 @@ def main():
 
         # 初始化网络
         if not hasattr(agent, "actor") or agent.actor is None:
-            agent.init_networks(env.observation_space.shape[0], env.action_space.shape[0])
+            agent.init_networks(
+                obs_dim=env.observation_space.shape[0],
+                action_dim=env.action_space.shape[0],
+                lookback_window=config.env.lookback_window,
+            )
             agent.load(args.model)
 
         # 回测

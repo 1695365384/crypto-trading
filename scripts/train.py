@@ -139,8 +139,12 @@ def main():
 
     # 7. 创建智能体
     print("\n[5/6] Initializing agent...")
-    agent = PPOAgent(config.model, config.device)
-    agent.init_networks(train_env.observation_space.shape[0], train_env.action_space.shape[0])
+    agent = PPOAgent(config.model, config.model.network, config.device)
+    agent.init_networks(
+        obs_dim=train_env.observation_space.shape[0],
+        action_dim=train_env.action_space.shape[0],
+        lookback_window=config.env.lookback_window,
+    )
 
     # 自动加载最新模型继续训练
     resume_path = find_latest_model(config.model_dir)

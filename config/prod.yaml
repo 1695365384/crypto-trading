@@ -35,11 +35,11 @@ env:
 model:
   algorithm: "PPO"
   actor_hidden_sizes:
+    - 256
     - 128
-    - 64
   critic_hidden_sizes:
+    - 256
     - 128
-    - 64
   learning_rate: 0.00003
   gamma: 0.99
   gae_lambda: 0.95
@@ -47,15 +47,18 @@ model:
   entropy_coef: 0.01
   value_coef: 0.5
   max_grad_norm: 0.5
-  batch_size: 64
-  buffer_size: 2048
+  batch_size: 256
+  buffer_size: 8192
   n_epochs: 10
   total_timesteps: 1000000
   save_freq: 50000
   eval_freq: 10000
+  n_envs: 8  # Mac上建议更多并行环境
+  use_amp: false  # Mac MPS不支持AMP
+  pin_memory: false  # MPS不支持pin_memory
 
-data_dir: "./data"
+data_dir: "./data/okx"
 model_dir: "./models"
 log_dir: "./logs"
-device: "cuda:0"
+device: "auto"  # 自动选择最佳设备
 seed: 42

@@ -66,8 +66,12 @@ def main():
 
     # 加载模型
     print(f"\nLoading model from {args.model}...")
-    agent = PPOAgent(config.model, config.device)
-    agent.init_networks(env.observation_space.shape[0], env.action_space.shape[0])
+    agent = PPOAgent(config.model, config.model.network, config.device)
+    agent.init_networks(
+        obs_dim=env.observation_space.shape[0],
+        action_dim=env.action_space.shape[0],
+        lookback_window=config.env.lookback_window,
+    )
     agent.load(args.model)
 
     # 运行回测

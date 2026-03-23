@@ -18,6 +18,7 @@ class TradingPredictor:
         model_path: str,
         obs_dim: int,
         action_dim: int,
+        lookback_window: int = 30,
         model_config: Optional[ModelConfig] = None,
         device: str = "cuda:0",
     ):
@@ -28,6 +29,7 @@ class TradingPredictor:
             model_path: 模型文件路径
             obs_dim: 观察空间维度
             action_dim: 动作空间维度
+            lookback_window: 回看窗口大小 (LSTM 模式需要)
             model_config: 模型配置
             device: 设备
         """
@@ -35,8 +37,12 @@ class TradingPredictor:
         self.model_config = model_config or ModelConfig()
 
         # 初始化智能体
-        self.agent = PPOAgent(self.model_config, device)
-        self.agent.init_networks(obs_dim, action_dim)
+        self.agent = PPOAgent(self.model_config, self.model_config.network, device)
+        self.agent.init_networks(
+            obs_dim=obs_dim,
+            action_dim=action_dim,
+            lookback_window=lookback_window,
+        )
 
         # 加载模型
         self.load(model_path)
@@ -58,7 +64,7 @@ class TradingPredictor:
             action, log_prob = self.agent.get_action(observation, deterministic)
 
             # 计算置信度 (基于策略熵)
-            mean, std = self.agent.actor(
+            mean, std, _ = self.agent.actor(
                 torch.FloatTensor(observation).unsqueeze(0).to(self.device)
             )
             entropy = -torch.log(std).mean().item()
@@ -174,7 +180,9 @@ class EnsemblePredictor:
         self.predictors = []
 
         for path in model_paths:
-            predictor = TradingPredictor(path, obs_dim, action_dim, model_config, device)
+            predictor = TradingPredictor(
+                path, obs_dim, action_dim, model_config=model_config, device=device
+            )
             self.predictors.append(predictor)
 
     def predict(self, observation: np.ndarray, method: str = "mean") -> Tuple[np.ndarray, float]:

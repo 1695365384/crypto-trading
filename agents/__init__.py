@@ -1,6 +1,14 @@
 """智能体模块"""
 
-from .ppo_agent import ActorNetwork, CriticNetwork, PPOAgent
+from .networks import ActorNetwork, CriticNetwork, LSTMSharedEncoder
+from .ppo_agent import PPOAgent
 from .replay_buffer import ReplayBuffer
 
-__all__ = ["PPOAgent", "ActorNetwork", "CriticNetwork", "ReplayBuffer"]
+__all__ = [
+    "PPOAgent",
+    # LSTM + MLP 网络
+    "ActorNetwork",
+    "CriticNetwork",
+    "LSTMSharedEncoder",
+    "ReplayBuffer",
+]

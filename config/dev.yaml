@@ -26,6 +26,17 @@ env:
 
 model:
   algorithm: "PPO"
+  # 网络架构配置 - LSTM + MLP 混合架构
+  network:
+    lstm_hidden_size: 128
+    lstm_num_layers: 1
+    lstm_dropout: 0.1
+    mlp_hidden_sizes:
+      - 256
+      - 128
+      - 64
+    mlp_dropout: 0.2
+    feature_dim_per_step: 0  # 自动计算
   actor_hidden_sizes:
     - 64
     - 32

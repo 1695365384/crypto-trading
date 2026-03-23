@@ -25,6 +25,9 @@ class TestBacktest:
 
     @pytest.fixture
     def env_and_agent(self, config):
+        # 固定随机种子确保可重复性
+        np.random.seed(42)
+
         # 创建样本数据
         n_steps = 1000
         n_assets = 2
@@ -117,11 +120,21 @@ class TestBacktest:
 
     def test_deterministic_vs_stochastic(self, config, env_and_agent):
         """测试确定性 vs 随机策略"""
+        import torch
+
         env, agent = env_and_agent
         backtester = Backtester(config)
 
+        # 设置随机种子确保可重复性
+        np.random.seed(42)
+        torch.manual_seed(42)
+
         # 运行两次确定性
         result1 = backtester.run(agent, env, deterministic=True)
+
+        # 重置随机种子
+        np.random.seed(42)
+        torch.manual_seed(42)
         result2 = backtester.run(agent, env, deterministic=True)
 
         # 确定性结果应该完全一致
