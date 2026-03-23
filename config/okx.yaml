@@ -36,14 +36,6 @@ env:
 
 model:
   algorithm: "PPO"
-  actor_hidden_sizes:
-    - 256
-    - 128
-    - 64
-  critic_hidden_sizes:
-    - 256
-    - 128
-    - 64
   learning_rate: 0.0001
   gamma: 0.99
   gae_lambda: 0.95
@@ -57,6 +49,18 @@ model:
   total_timesteps: 2000000
   save_freq: 200000
   eval_freq: 100000
+
+  # 网络架构配置
+  network:
+    lstm_hidden_size: 128
+    lstm_num_layers: 1
+    lstm_dropout: 0.1
+    mlp_hidden_sizes:
+      - 256
+      - 128
+      - 64
+    mlp_dropout: 0.2
+    feature_dim_per_step: 0
 
 data_dir: "./data/okx"
 model_dir: "./models"

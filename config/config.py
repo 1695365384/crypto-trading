@@ -101,10 +101,6 @@ class ModelConfig:
     # 网络架构配置
     network: NetworkConfig = field(default_factory=NetworkConfig)
 
-    # 网络结构 (保留用于配置兼容性)
-    actor_hidden_sizes: List[int] = field(default_factory=lambda: [256, 128])
-    critic_hidden_sizes: List[int] = field(default_factory=lambda: [256, 128])
-
     # 超参数
     learning_rate: float = 3e-5
     gamma: float = 0.99
@@ -179,8 +175,6 @@ class Config:
         """保存配置到 YAML 文件"""
         model_dict = {
             "algorithm": self.model.algorithm,
-            "actor_hidden_sizes": self.model.actor_hidden_sizes,
-            "critic_hidden_sizes": self.model.critic_hidden_sizes,
             "learning_rate": self.model.learning_rate,
             "gamma": self.model.gamma,
             "gae_lambda": self.model.gae_lambda,

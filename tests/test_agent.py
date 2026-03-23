@@ -104,8 +104,6 @@ class TestPPOAgent:
     @pytest.fixture
     def model_config(self):
         return ModelConfig(
-            actor_hidden_sizes=[64, 32],
-            critic_hidden_sizes=[64, 32],
             learning_rate=3e-4,
             gamma=0.99,
             gae_lambda=0.95,

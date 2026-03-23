@@ -462,6 +462,117 @@ position = sizer.calculate(
 
 ---
 
+### TradingPredictor
+
+单模型交易预测器。
+
+```python
+from inference.predictor import TradingPredictor
+
+predictor = TradingPredictor(
+    model_path='models/best_model.pt',
+    obs_dim=100,
+    action_dim=2,
+    lookback_window=60,
+    feature_dim=0,           # 0 表示自动计算
+    device='auto',           # 'auto', 'cuda:0', 'mps', 'cpu'
+    preprocessor_path=None   # 可选预处理器路径
+)
+
+# 预测交易动作
+action, confidence = predictor.predict(observation, deterministic=True)
+# action: np.ndarray [action_dim]
+# confidence: float (0-1)
+
+# 批量预测
+actions, confidences = predictor.predict_batch(observations)
+# actions: np.ndarray [batch, action_dim]
+# confidences: np.ndarray [batch]
+
+# 判断是否应该交易
+should_trade = predictor.should_trade(
+    action,
+    confidence,
+    action_threshold=0.1,      # 动作阈值
+    confidence_threshold=0.3   # 置信度阈值
+)
+
+# 获取仓位调整建议
+target_positions = predictor.get_position_adjustment(
+    current_positions,
+    action,
+    max_position=0.5
+)
+
+# 获取模型信息
+info = predictor.get_model_info()
+# 返回: {'model_path', 'device', 'obs_dim', 'action_dim', ...}
+```
+
+#### 方法
+
+| 方法 | 参数 | 返回值 | 说明 |
+|------|------|--------|------|
+| `predict` | obs, deterministic | (action, confidence) | 单次预测 |
+| `predict_batch` | observations, deterministic | (actions, confidences) | 批量预测 |
+| `should_trade` | action, confidence, thresholds | bool | 判断是否交易 |
+| `get_position_adjustment` | positions, action, max_pos | ndarray | 获取目标仓位 |
+| `get_model_info` | - | Dict | 获取模型信息 |
+
+---
+
+### EnsemblePredictor
+
+多模型集成预测器。
+
+```python
+from inference.predictor import EnsemblePredictor
+
+ensemble = EnsemblePredictor(
+    model_paths=['model1.pt', 'model2.pt', 'model3.pt'],
+    obs_dim=100,
+    action_dim=2,
+    lookback_window=60,
+    method='mean',              # 'mean', 'median', 'vote'
+    weights=[0.4, 0.3, 0.3],    # 可选，默认均匀权重
+    device='auto'
+)
+
+# 集成预测
+action, confidence = ensemble.predict(observation, deterministic=True)
+
+# 批量预测
+actions, confidences = ensemble.predict_batch(observations)
+
+# 获取模型分歧度 (用于不确定性估计)
+disagreement = ensemble.get_disagreement(observation)
+
+# 获取集成信息
+info = ensemble.get_ensemble_info()
+# 返回: {'n_models', 'method', 'weights', 'model_paths', ...}
+```
+
+#### 集成方法
+
+| 方法 | 说明 | 适用场景 |
+|------|------|----------|
+| `mean` | 加权平均 | 默认方法，稳定输出 |
+| `median` | 中位数 | 减少异常值影响 |
+| `vote` | 加权投票 | 方向性决策 |
+
+#### 方法
+
+| 方法 | 参数 | 返回值 | 说明 |
+|------|------|--------|------|
+| `predict` | obs, deterministic | (action, confidence) | 集成预测 |
+| `predict_batch` | observations, deterministic | (actions, confidences) | 批量预测 |
+| `should_trade` | action, confidence, thresholds | bool | 判断是否交易 |
+| `get_position_adjustment` | positions, action, max_pos | ndarray | 获取目标仓位 |
+| `get_disagreement` | observation | float | 获取模型分歧度 |
+| `get_ensemble_info` | - | Dict | 获取集成信息 |
+
+---
+
 ## 脚本使用
 
 ### train.py
