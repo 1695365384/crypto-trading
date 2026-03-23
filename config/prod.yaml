@@ -1,0 +1,61 @@
+# 生产环境配置示例
+# 用法: python scripts/train.py --config config/prod.yaml
+
+data:
+  tickers:
+    - BTCUSDT
+    - ETHUSDT
+  start_date: "2023-01-01"
+  end_date: "2025-12-31"
+  timeframe: 1
+  indicators:
+    - macd
+    - rsi_14
+    - boll_ub
+    - boll_lb
+    - ema_20
+    - ema_50
+    - atr
+    - obv
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+env:
+  initial_amount: 10000.0
+  max_position_pct: 0.5
+  transaction_cost_pct: 0.001
+  slippage_pct: 0.0005
+  reward_scaling: 0.0001
+  lookback_window: 60
+  num_assets: 2
+  stop_loss_pct: 0.1
+  take_profit_pct: 0.2
+
+model:
+  algorithm: "PPO"
+  actor_hidden_sizes:
+    - 128
+    - 64
+  critic_hidden_sizes:
+    - 128
+    - 64
+  learning_rate: 0.00003
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_ratio: 0.2
+  entropy_coef: 0.01
+  value_coef: 0.5
+  max_grad_norm: 0.5
+  batch_size: 64
+  buffer_size: 2048
+  n_epochs: 10
+  total_timesteps: 1000000
+  save_freq: 50000
+  eval_freq: 10000
+
+data_dir: "./data"
+model_dir: "./models"
+log_dir: "./logs"
+device: "cuda:0"
+seed: 42

@@ -1,0 +1,34 @@
+# OKX API 配置示例
+# 复制此文件为 settings.toml 并填入真实凭证
+
+[okx]
+# API 凭证（从 OKX 后台获取）
+api_key = "your-api-key"
+secret_key = "your-secret-key"
+passphrase = "your-passphrase"
+
+# 是否使用模拟环境
+demo = false
+
+# 速率限制（秒）
+rate_limit_delay = 0.1
+
+[data]
+# 默认交易对
+symbols = ["BTC-USDT", "ETH-USDT"]
+
+# K线周期
+bar = "1m"
+
+# 数据存储路径
+output_dir = "./data/okx"
+
+[download]
+# 开始日期 (YYYY-MM-DD)
+start_date = "2025-01-01"
+
+# 结束日期 (YYYY-MM-DD)
+end_date = "2026-03-23"
+
+# 每批请求数量
+batch_size = 300

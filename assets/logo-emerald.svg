@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="emerald" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#059669"/>
+      <stop offset="100%" style="stop-color:#10B981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 深色背景 -->
+  <rect width="200" height="200" fill="#022C22"/>
+
+  <!-- 六边形 -->
+  <polygon
+    points="100,18 166,52 166,128 100,162 34,128 34,52"
+    fill="none"
+    stroke="#10B981"
+    stroke-width="1.5"
+  />
+
+  <!-- K线 - 单色绿色系 -->
+  <g fill="#059669" stroke="#10B981" stroke-width="1">
+    <rect x="52" y="88" width="14" height="22" rx="2"/>
+    <rect x="72" y="73" width="14" height="24" rx="2"/>
+    <rect x="92" y="83" width="14" height="22" rx="2"/>
+    <rect x="112" y="63" width="14" height="24" rx="2"/>
+    <rect x="132" y="56" width="14" height="26" rx="2"/>
+  </g>
+
+  <!-- 趋势线 -->
+  <polyline
+    points="59,100 79,85 99,90 119,72 139,65"
+    fill="none"
+    stroke="#34D399"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- 数据点 -->
+  <g fill="#34D399">
+    <circle cx="59" cy="100" r="2.5"/>
+    <circle cx="79" cy="85" r="2.5"/>
+    <circle cx="99" cy="90" r="2.5"/>
+    <circle cx="119" cy="72" r="2.5"/>
+    <circle cx="139" cy="65" r="3.5"/>
+  </g>
+
+  <!-- 上升箭头 -->
+  <path
+    d="M 148 58 L 155 48 L 162 58"
+    fill="none"
+    stroke="#34D399"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- 顶点 -->
+  <g fill="#10B981">
+    <circle cx="100" cy="18" r="2.5"/>
+    <circle cx="166" cy="52" r="2.5"/>
+    <circle cx="166" cy="128" r="2.5"/>
+    <circle cx="100" cy="162" r="2.5"/>
+    <circle cx="34" cy="128" r="2.5"/>
+    <circle cx="34" cy="52" r="2.5"/>
+  </g>
+
+  <!-- 底部文字区域 -->
+  <text x="100" y="180" font-family="SF Mono, Monaco, Consolas, monospace" font-size="10" fill="#10B981" text-anchor="middle" letter-spacing="3">TRADE</text>
+</svg>

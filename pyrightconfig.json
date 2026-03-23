@@ -1,0 +1,35 @@
+{
+  "include": [
+    "agents",
+    "config",
+    "data",
+    "envs",
+    "evaluation",
+    "inference",
+    "training"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "venv",
+    ".venv",
+    "tests",
+    "scripts"
+  ],
+  "ignore": [],
+  "defineConstant": {},
+  "stubPath": "",
+  "venvPath": ".",
+  "venv": "venv",
+  "pythonVersion": "3.9",
+  "pythonPlatform": "Darwin",
+  "executionEnvironments": [],
+  "typeCheckingMode": "off",
+  "reportMissingImports": false,
+  "reportMissingTypeStubs": false,
+  "reportUnusedImport": false,
+  "reportUnusedClass": false,
+  "reportUnusedFunction": false,
+  "reportUnusedVariable": false,
+  "reportDuplicateImport": false
+}
